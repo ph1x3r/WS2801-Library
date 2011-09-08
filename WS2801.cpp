@@ -428,17 +428,19 @@ void WS2801::SpinLine(int del, uint32_t col)
 
     for(xx=0; xx<gridWidth; xx++)
     {
-        setRange(0,numLEDs-1,0);
+        //setRange(0,numLEDs-1,0);
         line(xx,0,gridWidth-1-xx, gridHeight-1, col);
         show();
         delay(del);
+        line(xx,0,gridWidth-1-xx, gridHeight-1, 0);
     }
     for(yy=1; yy<gridHeight-1; yy++)
     {
-        setRange(0,numLEDs-1,Color(0,0,0));
-        line(xx, yy, gridWidth-1-xx, gridHeight-1-yy, col);
+        //setRange(0,numLEDs-1,Color(0,0,0));
+        line(0, gridHeight-1-yy, gridWidth-1, yy, col);
         show();
         delay(del);
+        line(0, gridHeight-1-yy, gridWidth-1, yy, 0);
     }
 }
 
