@@ -20,8 +20,8 @@ int dataPin = dPIN;       // 'green' wire
 // int pixLength=87;
 
 // Set the size of the matrix
-int boxWidth=14;
-int boxHeight=12;
+int boxWidth=11;
+int boxHeight=15;
 
 // If you only want to use the string as a string, then use this function
 // WS2801 strip = WS2801(25, dataPin, clockPin);
@@ -57,8 +57,8 @@ void loop() {
   strip.clear();
   colorWipe(strip.Color(0, 0, 255), 10);
   strip.clear();
-  //colorWipe(strip.Color(255, 255, 255), 10);
-  //delay( 50);
+  colorWipe(strip.Color(255, 255, 255), 10);
+  delay( 50);
 
   // display a shrinking box
   int steps = abs((boxWidth+boxHeight)/4);
@@ -105,42 +105,48 @@ void loop() {
   
 
       //Do some wipes of color on the grid.
-      strip.MoveLinesV(50, strip.Color(128,0,0));
-      strip.MoveLinesH(50, strip.Color(128,0,0));
-      strip.MoveLinesRV(50, strip.Color(128,0,0));
-      strip.MoveLinesRH(50, strip.Color(128,0,0));
+      strip.MoveLinesV(5, strip.Color(128,0,0));
+      strip.MoveLinesRV(5, strip.Color(128,0,0));
+      strip.MoveLinesH(5, strip.Color(128,0,0));
+      strip.MoveLinesRH(5, strip.Color(128,0,0));
       
-      strip.MoveLinesV(50, strip.Color(64,64,0));
-      strip.MoveLinesRV(50, strip.Color(64,64,0));
-      strip.MoveLinesH(50, strip.Color(64,64,0));
-      strip.MoveLinesRH(50, strip.Color(64,64,0));
+      strip.MoveLinesV(5, strip.Color(64,64,0));
+      strip.MoveLinesRV(5, strip.Color(64,64,0));
+      strip.MoveLinesH(5, strip.Color(64,64,0));
+      strip.MoveLinesRH(5, strip.Color(64,64,0));
       
- /*     strip.MoveLinesV(10, strip.Color(0,254,0));
-      strip.MoveLinesH(10, strip.Color(0,254,0));
-      strip.MoveLinesRV(10, strip.Color(0,254,0));
-      strip.MoveLinesRH(10, strip.Color(0,254,0));
+      strip.MoveLinesV(5, strip.Color(0,254,0));
+      strip.MoveLinesRV(5, strip.Color(0,254,0));
+      strip.MoveLinesH(5, strip.Color(0,254,0));
+      strip.MoveLinesRH(5, strip.Color(0,254,0));
 
-      strip.MoveLinesV(10, strip.Color(0,254,254));
-      strip.MoveLinesH(10, strip.Color(0,254,254));      
-      strip.MoveLinesRV(10, strip.Color(0,254,254));
-      strip.MoveLinesRH(10, strip.Color(0,254,254));
+      strip.MoveLinesV(5, strip.Color(0,254,254));
+      strip.MoveLinesRV(5, strip.Color(0,254,254));
+      strip.MoveLinesH(5, strip.Color(0,254,254));      
+      strip.MoveLinesRH(5, strip.Color(0,254,254));
 
-      strip.MoveLinesV(10, strip.Color(0,0,254));
-      strip.MoveLinesH(10, strip.Color(0,0,254));
-      strip.MoveLinesRV(10, strip.Color(0,0,254));
-      strip.MoveLinesRH(10, strip.Color(0,0,254));
+      strip.MoveLinesV(5, strip.Color(0,0,254));
+      strip.MoveLinesRV(5, strip.Color(0,0,254));
+      strip.MoveLinesH(5, strip.Color(0,0,254));
+      strip.MoveLinesRH(5, strip.Color(0,0,254));
       
-      strip.MoveLinesV(10, strip.Color(254,0,254));
-      strip.MoveLinesH(10, strip.Color(254,0,254));
-      strip.MoveLinesRV(10, strip.Color(254,0,254));
-      strip.MoveLinesRH(10, strip.Color(254,0,254));   */  
+      strip.MoveLinesV(5, strip.Color(254,0,254));
+      strip.MoveLinesRV(5, strip.Color(254,0,254));
+      strip.MoveLinesH(5, strip.Color(254,0,254));
+      strip.MoveLinesRH(5, strip.Color(254,0,254));  
 
   strip.clear();
 
   // draw a pixel moving along the strand with a 'tail' as it travels
-  strip.comet(10, 254, 0, 0, 1);
-  strip.comet(10, 0, 254, 0, 1);
-  strip.comet(10, 0, 0, 254, 1);
+  strip.comet(1, 254, 0, 0, 1);
+  strip.comet(1, 0, 254, 0, 1);
+  strip.comet(1, 254, 254, 254, 1);
+
+  strip.clear();
+  for(xx=0; xx<255; xx+=25)
+  {
+    strip.SpinLine(50, strip.Color(128, xx, 32));
+  }
 
   // original adafruit calls for rainbow display on the strand
   rainbow(5);
