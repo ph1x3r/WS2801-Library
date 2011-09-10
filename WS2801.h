@@ -13,6 +13,8 @@
 #define cpHIGH B1000
 #define dpHIGH B10000
 
+#define swap(a, b) { int16_t t = a; a = b; b = t; }
+
 class WS2801
 {
     private:
@@ -39,8 +41,8 @@ class WS2801
         uint32_t Color(uint8_t r, uint8_t g, uint8_t b);
         void setRange(uint16_t startLED, uint16_t endLED, uint32_t color );
 
-        void swap(int * a, int * b);
         void line(int x0,  int y0, int x1, int y1, uint32_t color);
+        void HVLine(int x, int y, int len, int dir, uint32_t color);
 
         void box(int x0, int y0, int x1, int y1, uint32_t color);
         void comet(int wait, int red, int green, int blue, int dir);
