@@ -15,16 +15,23 @@
  * ported into this library by ph1x3r (ph1x3r@gmail.com)
  *****************************************************************************/
 
+//-----
+// initialize with the length of the string
+// set height and width to a resonable number just in case
+//-----
 WS2801::WS2801(uint16_t n, uint8_t dpin, uint8_t cpin)
 {
     dataPin = dpin;
     clockPin = cpin;
+    gridWidth=n;
+    gridHeight=1;
     numLEDs = n;
 
     pixels = (uint32_t *)malloc(numLEDs);
     for (uint16_t i=0; i< numLEDs; i++)
     {
-        setPixelColor(i, 0, 0, 0);
+        pixels[n] = 0;
+        //setPixelColor(i, 0, 0, 0);
     }
 
 }
@@ -32,6 +39,7 @@ WS2801::WS2801(uint16_t n, uint8_t dpin, uint8_t cpin)
 
 //-----
 // ph1x3r - initialize with array size
+// set all the pixels to zero to start with
 //-----
 WS2801::WS2801(uint16_t x, uint16_t y, uint8_t dpin, uint8_t cpin)
 {
@@ -49,14 +57,18 @@ WS2801::WS2801(uint16_t x, uint16_t y, uint8_t dpin, uint8_t cpin)
 
 }
 
-
+//-----
+// set up the pins on the arduino
+//-----
 void WS2801::begin(void)
 {
     pinMode(dataPin, OUTPUT);
     pinMode(clockPin, OUTPUT);
 }
 
-
+//-----
+// helper function to allow external programs to retrieve the number of LEDs
+//-----
 uint16_t WS2801::numPixels(void)
 {
     return numLEDs;
@@ -64,47 +76,40 @@ uint16_t WS2801::numPixels(void)
 
 
 //---
-// ph1x3r - digitalWrite is way to slow.
+// ph1x3r - digitalWrite is way too slow.
 // over 7 times speed improvement by bitbanging port directly
+// logic analyzer shows clock line pulsed at over 500kHz
+// or approx 42uS for each pixel in the string.
 //---
 void WS2801::show(void)
 {
     uint32_t data;
-//digitalWrite(clockPin, LOW);
-//PORTD = PORTD & B11110111;
+    //digitalWrite(clockPin, LOW);
     PORTD = PORTD & cpLOW;
     delay(1);
 
-// send all the pixels
+    // send all the pixels
     for (uint16_t p=0; p< numLEDs; p++)
     {
         data = pixels[p];
-// 24 bits of data per pixel
+        // 24 bits of data per pixel
         for (int32_t i=0x800000; i>0; i>>=1)
         {
-//digitalWrite(clockPin, LOW);
-//PORTD = PORTD & B11110111;
+            //digitalWrite(clockPin, LOW);
             PORTD = PORTD & cpLOW;
-            if (data & i)
-            {
-//digitalWrite(dataPin, HIGH);
-//PORTD = PORTD | B10000;
+            if (data & i) {
+                //digitalWrite(dataPin, HIGH);
                 PORTD = PORTD | dpHIGH;
-            }
-            else
-            {
-//digitalWrite(dataPin, LOW);
-//PORTD = PORTD & B11101111;
+            } else {
+                //digitalWrite(dataPin, LOW);
                 PORTD = PORTD & dpLOW;
             }
-//digitalWrite(clockPin, HIGH);    // latch on clock rise
-//PORTD = PORTD | B1000;
+            //digitalWrite(clockPin, HIGH);    // latch on clock rise
             PORTD = PORTD | cpHIGH;
         }
     }
-// when we're done we hold the clock pin low for a millisecond to latch it
-//digitalWrite(clockPin, LOW);
-//PORTD = PORTD & B11110111;
+    // when we're done we hold the clock pin low for a millisecond to latch it
+    //digitalWrite(clockPin, LOW);
     PORTD = PORTD & cpLOW;
     delay(1);
 }
@@ -152,6 +157,7 @@ uint16_t WS2801::Translate(uint16_t x, uint16_t y)
 
 //---
 // ph1x3r - create a single color value out of RGB values
+//---
 uint32_t WS2801::Color(uint8_t r, uint8_t g, uint8_t b)
 {
     uint32_t data;
@@ -179,18 +185,30 @@ void WS2801::setRange(uint16_t startLED, uint16_t endLED, uint32_t color )
     }
 }
 
-
-//---
-//Swap the values of two variables, for use when drawing lines.
-//---
-void WS2801::swap(int * a, int * b)
+//-----
+// draw a horizontal or vertical line from an XY starting point
+// for len length and in dir direction
+// 0=right, 1=down, 2=left, 3=up
+//-----
+void WS2801::HVLine(int x, int y, int len, int dir, uint32_t color)
 {
-    uint16_t temp;
-    temp=*b;
-    *b=*a;
-    *a=temp;
+     if(dir==0) { 
+        for(int delta=0; delta<len; delta++) {
+          setPixelColor(Translate(x+delta, y), color); }
+     }
+     if(dir==1) { 
+        for(int delta=0; delta<len; delta++) {
+          setPixelColor(Translate(x, y+delta), color);}
+     }
+     if(dir==2) { 
+        for(int delta=0; delta<len; delta++) {
+          setPixelColor(Translate(x-delta, y), color);}
+     }
+     if(dir==3) { 
+        for(int delta=0; delta<len; delta++) {
+          setPixelColor(Translate(x, y-delta), color);}
+     }
 }
-
 
 //---
 // Draw a line in defined color between two points
@@ -200,16 +218,14 @@ void WS2801::line(int x0,  int y0, int x1, int y1, uint32_t color)
 {
     boolean steep;
     steep= abs(y1 - y0) > abs(x1 - x0);
-    if (steep)
-    {
-        swap(&x0, &y0);
-        swap(&x1, &y1);
+    if (steep) {
+        swap(x0, y0);
+        swap(x1, y1);
     }
 
-    if (x0 > x1)
-    {
-        swap(&x0, &x1);
-        swap(&y0, &y1);
+    if (x0 > x1) {
+        swap(x0, x1);
+        swap(y0, y1);
     }
 
     int deltax = x1 - x0;
@@ -226,12 +242,9 @@ void WS2801::line(int x0,  int y0, int x1, int y1, uint32_t color)
 
     for (x=x0; x<=x1; x++)                        // from x0 to x1
     {
-        if (steep)
-        {
+        if (steep) {
             pixels[Translate(y,x)]= color;        //Fast set LEDs in grid.
-        }
-        else
-        {
+        } else {
             pixels[Translate(x,y)]= color;        //Fast set LEDs in grid.
         }
 
@@ -262,19 +275,16 @@ void WS2801::box(int x0, int y0, int x1, int y1, uint32_t color)
 //=====
 // draw dot along strand with fading tail (ph1x3r)
 //=====
-void WS2801::comet(int wait, int red, int green, int blue, int dir)
+void WS2801::comet(int wait, int red, int green, int blue, int tail)
 {
     int xx, yy, zz;
-    int tail = 5;
 
 // run the length of the strip
     for(zz=0; zz<(numLEDs+tail); zz++)
     {
-
-//    setRange(0,numLEDs-1,Color(0,0,0));
         clear();
         xx=tail;
-        for(yy=254; yy>=0; yy=yy-(3*tail))
+        for(yy=254; yy>=0; yy=yy-(abs(255/tail)))
         {
             setPixelColor(zz-xx,
                 Color(
@@ -421,22 +431,25 @@ void WS2801::MoveLinesRV(int del, uint32_t col)
 
 //=====
 // Spin a line in the panel (clockwise) (ph1x3r)
+// this does one full rotation
 //=====
 void WS2801::SpinLine(int del, uint32_t col)
 {
     int xx, yy;
 
+    // draw lines in the horizontal direction
+    // line is erased before drawing the next line
     for(xx=0; xx<gridWidth; xx++)
     {
-        //setRange(0,numLEDs-1,0);
         line(xx,0,gridWidth-1-xx, gridHeight-1, col);
         show();
         delay(del);
         line(xx,0,gridWidth-1-xx, gridHeight-1, 0);
     }
+    // draw the lines in the vertical direction
+    // line is erased before drawing the next line
     for(yy=1; yy<gridHeight-1; yy++)
     {
-        //setRange(0,numLEDs-1,Color(0,0,0));
         line(0, gridHeight-1-yy, gridWidth-1, yy, col);
         show();
         delay(del);
@@ -450,5 +463,7 @@ void WS2801::SpinLine(int del, uint32_t col)
 //=====
 void WS2801::clear()
 {
-    setRange(0,numLEDs-1,0);
+    for (uint16_t i=0; i< numLEDs; i++) {
+        pixels[i] = 0;
+    }
 }
