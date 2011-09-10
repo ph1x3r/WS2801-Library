@@ -1,9 +1,11 @@
 #include "WS2801.h"
 
 /*********************************************************
- * sketch for driving the LED Pixel strings from Adafruit *
+ * sketch for driving the LED Pixel strings from Adafruit*
+ *********************************************************
+ * modified by ph1x3r for testing pixels in a matrix     *
  *********************************************************/
- 
+
 // Choose which 2 pins you will use for output.
 // Can be any valid output pins.
 //
@@ -31,7 +33,7 @@ int boxHeight=15;
 WS2801 strip = WS2801(boxWidth, boxHeight, dataPin, clockPin);
 
 void setup() {
-  
+
   // initialize the library - sets all pixels to '0' (no color)
   strip.begin();
 
@@ -41,12 +43,12 @@ void setup() {
 
 
 void loop() {
-  
+
   // Some example procedures showing how to display to the pixels
-  
+
   // since we keep looping back here, then clear the display
   strip.clear();
- 
+
   // original adafruit function. 
   // run the length of the strand and set the color as defined
   // Usage:  colorWipe(color, wait)
@@ -57,8 +59,26 @@ void loop() {
   strip.clear();
   colorWipe(strip.Color(0, 0, 255), 10);
   strip.clear();
-  colorWipe(strip.Color(255, 255, 255), 10);
-  delay( 50);
+  // colorWipe(strip.Color(255, 255, 255), 10);
+  // delay( 50);
+
+  strip.clear();
+
+  // demonstrate new function for drawing horizontal and vertical lines
+  strip.HVLine(6, 6, 4, 0, strip.Color(0, 255, 0));
+  strip.show();
+  delay(100);
+  strip.HVLine(6, 6, 4, 1, strip.Color(255, 255, 0));
+  strip.show();
+  delay(100);
+  strip.HVLine(6, 6, 4, 2, strip.Color(0, 255, 255));
+  strip.show();
+  delay(100);
+  strip.HVLine(6, 6, 4, 3, strip.Color(0, 0, 255));
+  strip.show();
+  delay(100);
+
+  delay(500);
 
   // display a shrinking box
   int steps = abs((boxWidth+boxHeight)/4);
@@ -74,8 +94,8 @@ void loop() {
     delay(500);
     strip.box(x1+xx, y1+xx, x2-xx, y2-xx, strip.Color(0, 0, 0));
   }
-  
-    // different color
+
+  // different color
   for(xx=0; xx<steps; xx++)
   {
     int x1=0;
@@ -87,7 +107,7 @@ void loop() {
     delay(500);
     strip.box(x1+xx, y1+xx, x2-xx, y2-xx, strip.Color(0, 0, 0));
   }
-      // different color
+  // different color
   for(xx=0; xx<steps; xx++)
   {
     int x1=0;
@@ -99,66 +119,66 @@ void loop() {
     delay(500);
     strip.box(x1+xx, y1+xx, x2-xx, y2-xx, strip.Color(0, 0, 0));
   }
-  
+
   // blink all the lights in random colors
   strip.Twinkle(30, 50);
-  
 
-      //Do some wipes of color on the grid.
-      strip.MoveLinesV(5, strip.Color(128,0,0));
-      strip.MoveLinesRV(5, strip.Color(128,0,0));
-      strip.MoveLinesH(5, strip.Color(128,0,0));
-      strip.MoveLinesRH(5, strip.Color(128,0,0));
-      
-      strip.MoveLinesV(5, strip.Color(64,64,0));
-      strip.MoveLinesRV(5, strip.Color(64,64,0));
-      strip.MoveLinesH(5, strip.Color(64,64,0));
-      strip.MoveLinesRH(5, strip.Color(64,64,0));
-      
-      strip.MoveLinesV(5, strip.Color(0,254,0));
-      strip.MoveLinesRV(5, strip.Color(0,254,0));
-      strip.MoveLinesH(5, strip.Color(0,254,0));
-      strip.MoveLinesRH(5, strip.Color(0,254,0));
 
-      strip.MoveLinesV(5, strip.Color(0,254,254));
-      strip.MoveLinesRV(5, strip.Color(0,254,254));
-      strip.MoveLinesH(5, strip.Color(0,254,254));      
-      strip.MoveLinesRH(5, strip.Color(0,254,254));
+  //Do some wipes of color on the grid.
+  strip.MoveLinesV(5, strip.Color(128,0,0));
+  strip.MoveLinesRV(5, strip.Color(128,0,0));
+  strip.MoveLinesH(5, strip.Color(128,0,0));
+  strip.MoveLinesRH(5, strip.Color(128,0,0));
 
-      strip.MoveLinesV(5, strip.Color(0,0,254));
-      strip.MoveLinesRV(5, strip.Color(0,0,254));
-      strip.MoveLinesH(5, strip.Color(0,0,254));
-      strip.MoveLinesRH(5, strip.Color(0,0,254));
-      
-      strip.MoveLinesV(5, strip.Color(254,0,254));
-      strip.MoveLinesRV(5, strip.Color(254,0,254));
-      strip.MoveLinesH(5, strip.Color(254,0,254));
-      strip.MoveLinesRH(5, strip.Color(254,0,254));  
+  strip.MoveLinesV(5, strip.Color(64,64,0));
+  strip.MoveLinesRV(5, strip.Color(64,64,0));
+  strip.MoveLinesH(5, strip.Color(64,64,0));
+  strip.MoveLinesRH(5, strip.Color(64,64,0));
+
+  strip.MoveLinesV(5, strip.Color(0,254,0));
+  strip.MoveLinesRV(5, strip.Color(0,254,0));
+  strip.MoveLinesH(5, strip.Color(0,254,0));
+  strip.MoveLinesRH(5, strip.Color(0,254,0));
+
+  strip.MoveLinesV(5, strip.Color(0,254,254));
+  strip.MoveLinesRV(5, strip.Color(0,254,254));
+  strip.MoveLinesH(5, strip.Color(0,254,254));      
+  strip.MoveLinesRH(5, strip.Color(0,254,254));
+
+  strip.MoveLinesV(5, strip.Color(0,0,254));
+  strip.MoveLinesRV(5, strip.Color(0,0,254));
+  strip.MoveLinesH(5, strip.Color(0,0,254));
+  strip.MoveLinesRH(5, strip.Color(0,0,254));
+
+  strip.MoveLinesV(5, strip.Color(254,0,254));
+  strip.MoveLinesRV(5, strip.Color(254,0,254));
+  strip.MoveLinesH(5, strip.Color(254,0,254));
+  strip.MoveLinesRH(5, strip.Color(254,0,254));  
 
   strip.clear();
 
   // draw a pixel moving along the strand with a 'tail' as it travels
-  strip.comet(1, 254, 0, 0, 1);
-  strip.comet(1, 0, 254, 0, 1);
-  strip.comet(1, 254, 254, 254, 1);
+  strip.comet(50, 254, 0, 0, 5);
+  strip.comet(50, 0, 254, 0, 10);
+  strip.comet(50, 254, 254, 254, 20);
 
   strip.clear();
-  for(xx=0; xx<255; xx+=25)
+  for(xx=0; xx<255; xx+=5)
   {
-    strip.SpinLine(50, strip.Color(128, xx, 32));
+    strip.SpinLine(5, strip.Color(128, xx, 32));
   }
 
   // original adafruit calls for rainbow display on the strand
   rainbow(5);
   strip.clear();
-  
+
   rainbowCycle(5);
 }
 
 // original adafruit code for 'rainbow' effect on the strand
 void rainbow(uint8_t wait) {
   int i, j;
-   
+
   for (j=0; j < 256 *3; j++) {     // 3 cycles of all 256 colors in the wheel
     for (i=0; i < strip.numPixels(); i++) {
       strip.setPixelColor(i, Wheel( (i + j) % 255));
@@ -172,7 +192,7 @@ void rainbow(uint8_t wait) {
 // along the chain
 void rainbowCycle(uint8_t wait) {
   int i, j;
-  
+
   for (j=0; j < 256 * 5; j++) {     // 5 cycles of all 256 colors in the wheel
     for (i=0; i < strip.numPixels(); i++) {
       // tricky math! we use each pixel as a fraction of the full 256-color wheel
@@ -190,11 +210,11 @@ void rainbowCycle(uint8_t wait) {
 // good for testing purposes
 void colorWipe(uint32_t c, uint8_t wait) {
   int i;
-  
+
   for (i=0; i < strip.numPixels(); i++) {
-      strip.setPixelColor(i, c);
-      strip.show();
-      delay(wait);
+    strip.setPixelColor(i, c);
+    strip.show();
+    delay(wait);
   }
 }
 
@@ -205,12 +225,15 @@ void colorWipe(uint32_t c, uint8_t wait) {
 uint32_t Wheel(byte WheelPos)
 {
   if (WheelPos < 85) {
-   return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
-  } else if (WheelPos < 170) {
-   WheelPos -= 85;
-   return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
-  } else {
-   WheelPos -= 170; 
-   return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+    return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+  } 
+  else if (WheelPos < 170) {
+    WheelPos -= 85;
+    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  } 
+  else {
+    WheelPos -= 170; 
+    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
   }
 }
+
