@@ -1,4 +1,5 @@
 #include <WProgram.h>
+#include <SPI.h>
 
 class WS2801
 {

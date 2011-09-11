@@ -1,5 +1,8 @@
 #include "WS2801.h"
 
+#include <pins_arduino.h>
+#include <SPI.h>
+
 // Example to control WS2801-based RGB LED Modules in a strand or strip
 // Written by Adafruit - MIT license
 /*****************************************************************************
@@ -18,12 +21,16 @@
 // used in the line drawing algorithm
 #define swap(a, b) { int16_t t = a; a = b; b = t; }
 
-// define the SPI port parameters
+// SPI ports are part of the hardware design. Use defaults.
+// pin names from the pins_arduino.h file
 // only DATAOUT and SPICLOCK are used, the rest are ignored
-#define DATAOUT 11//MOSI
-#define DATAIN  12//MISO 
-#define SPICLOCK  13//sck
-#define SLAVESELECT 10//ss
+// =====+=====+========
+// pin  | Uno | Teensy2
+// =====+=====+========
+// MOSI | 11  | 2
+// MISO | 12  | 3
+// SCLK | 13  | 1
+// SS   | 10  | 0
 
 /*
 Data for setting the SPI control register - informational only
@@ -82,12 +89,9 @@ WS2801::WS2801(uint16_t x, uint16_t y)
 //-----
 void WS2801::begin(void)
 {
-  // set up the SPI pins
-  pinMode(DATAOUT, OUTPUT);
-  pinMode(DATAIN, INPUT);
-  pinMode(SPICLOCK,OUTPUT);
-  pinMode(SLAVESELECT,OUTPUT);
-  digitalWrite(SLAVESELECT,HIGH); //disable device - not used on WS2801
+  // set up SPI port pins
+  // function sets SS to HIGH as part of initialization
+  SPI.begin();
 
   // SPCR = 01010001
   //interrupt disabled,spi enabled,msb 1st,master,clk low when idle,
@@ -117,13 +121,14 @@ void WS2801::show(void)
     // my SPI protocol analyzer needs SS to be toggled
     // enabling this makes very little difference in the frame rate
     // but it can be commented out without impact
-    digitalWrite(SLAVESELECT,LOW);
+    digitalWrite(SS,LOW);
 
     // send all the pixels
     // pixel data is stored as 32bit numbers, and SPI only works with
     // 8 bit numbers, so bitshift and mask to get the info
     for (uint16_t p=0; p< numLEDs; p++)
     {
+      // method is the same as SPI.transfer() but saves the call
       // send red pixel
       SPDR = pixels[p]>>16 & 0xff;
       while (!(SPSR & (1<<SPIF))) {};
@@ -136,7 +141,7 @@ void WS2801::show(void)
     }
 
     // for my protocol analyzer - see above
-    digitalWrite(SLAVESELECT,HIGH);
+    digitalWrite(SS,HIGH);
 }
 
 void WS2801::setPixelColor(uint16_t n, uint8_t r, uint8_t g, uint8_t b)
