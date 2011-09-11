@@ -15,14 +15,38 @@
  * ported into this library by ph1x3r (ph1x3r@gmail.com)
  *****************************************************************************/
 
+// used in the line drawing algorithm
+#define swap(a, b) { int16_t t = a; a = b; b = t; }
+
+// define the SPI port parameters
+// only DATAOUT and SPICLOCK are used, the rest are ignored
+#define DATAOUT 11//MOSI
+#define DATAIN  12//MISO 
+#define SPICLOCK  13//sck
+#define SLAVESELECT 10//ss
+
+/*
+Data for setting the SPI control register - informational only
+SPCR
+| 7    | 6    | 5    | 4    | 3    | 2    | 1    | 0    |
+| SPIE | SPE  | DORD | MSTR | CPOL | CPHA | SPR1 | SPR0 |
+
+SPIE - Enables the SPI interrupt when 1
+SPE  - Enables the SPI when 1
+DORD - Sends data least Significant Bit First when 1, most Significant Bit first
+MSTR - Sets the Arduino in master mode when 1, slave mode when 0
+CPOL - Sets the data clock to be idle when high if set to 1, idle when low if se
+CPHA - Samples data on the falling edge of the data clock when 1, rising edge wh
+SPR1 and SPR0 - Sets the SPI speed, 00 is fastest (4MHz) 11 is slowest (250KHz)
+*/
+
 //-----
 // initialize with the length of the string
-// set height and width to a resonable number just in case
+// set height and width to a resonable number just in case one of the
+// grid functions is called
 //-----
-WS2801::WS2801(uint16_t n, uint8_t dpin, uint8_t cpin)
+WS2801::WS2801(uint16_t n)
 {
-    dataPin = dpin;
-    clockPin = cpin;
     gridWidth=n;
     gridHeight=1;
     numLEDs = n;
@@ -30,10 +54,8 @@ WS2801::WS2801(uint16_t n, uint8_t dpin, uint8_t cpin)
     pixels = (uint32_t *)malloc(numLEDs);
     for (uint16_t i=0; i< numLEDs; i++)
     {
-        pixels[n] = 0;
-        //setPixelColor(i, 0, 0, 0);
+        setPixelColor(i, 0, 0, 0);
     }
-
 }
 
 
@@ -41,10 +63,8 @@ WS2801::WS2801(uint16_t n, uint8_t dpin, uint8_t cpin)
 // ph1x3r - initialize with array size
 // set all the pixels to zero to start with
 //-----
-WS2801::WS2801(uint16_t x, uint16_t y, uint8_t dpin, uint8_t cpin)
+WS2801::WS2801(uint16_t x, uint16_t y)
 {
-    dataPin = dpin;
-    clockPin = cpin;
     gridWidth=x;
     gridHeight=y;
     numLEDs = x * y;
@@ -54,16 +74,29 @@ WS2801::WS2801(uint16_t x, uint16_t y, uint8_t dpin, uint8_t cpin)
     {
         setPixelColor(i, 0, 0, 0);
     }
-
 }
+
 
 //-----
 // set up the pins on the arduino
 //-----
 void WS2801::begin(void)
 {
-    pinMode(dataPin, OUTPUT);
-    pinMode(clockPin, OUTPUT);
+  // set up the SPI pins
+  pinMode(DATAOUT, OUTPUT);
+  pinMode(DATAIN, INPUT);
+  pinMode(SPICLOCK,OUTPUT);
+  pinMode(SLAVESELECT,OUTPUT);
+  digitalWrite(SLAVESELECT,HIGH); //disable device - not used on WS2801
+
+  // SPCR = 01010001
+  //interrupt disabled,spi enabled,msb 1st,master,clk low when idle,
+  //sample on leading edge of clk,system clock/8 rate (01)
+  SPCR = (1<<SPE) | (1<<MSTR) | (1<<SPR0);
+
+  // junk any data in the status register or data input register
+  byte clr=SPSR;
+  clr=SPDR;
 }
 
 //-----
@@ -76,44 +109,35 @@ uint16_t WS2801::numPixels(void)
 
 
 //---
-// ph1x3r - digitalWrite is way too slow.
-// over 7 times speed improvement by bitbanging port directly
-// logic analyzer shows clock line pulsed at over 500kHz
-// or approx 42uS for each pixel in the string.
-//---
+// ph1x3r - digitalWrite is way too slow for sending pixels.
+// Use Arduino SPI hardware to increase speed
+// now running at 28uS per pixel
 void WS2801::show(void)
 {
-    uint32_t data;
-    //digitalWrite(clockPin, LOW);
-    PORTD = PORTD & cpLOW;
-    delay(1);
+    // my SPI protocol analyzer needs SS to be toggled
+    // enabling this makes very little difference in the frame rate
+    // but it can be commented out without impact
+    digitalWrite(SLAVESELECT,LOW);
 
     // send all the pixels
+    // pixel data is stored as 32bit numbers, and SPI only works with
+    // 8 bit numbers, so bitshift and mask to get the info
     for (uint16_t p=0; p< numLEDs; p++)
     {
-        data = pixels[p];
-        // 24 bits of data per pixel
-        for (int32_t i=0x800000; i>0; i>>=1)
-        {
-            //digitalWrite(clockPin, LOW);
-            PORTD = PORTD & cpLOW;
-            if (data & i) {
-                //digitalWrite(dataPin, HIGH);
-                PORTD = PORTD | dpHIGH;
-            } else {
-                //digitalWrite(dataPin, LOW);
-                PORTD = PORTD & dpLOW;
-            }
-            //digitalWrite(clockPin, HIGH);    // latch on clock rise
-            PORTD = PORTD | cpHIGH;
-        }
+      // send red pixel
+      SPDR = pixels[p]>>16 & 0xff;
+      while (!(SPSR & (1<<SPIF))) {};
+      // send green pixel
+      SPDR = pixels[p]>>8 & 0xff;
+      while (!(SPSR & (1<<SPIF))) {};
+      // send blue pixel
+      SPDR = pixels[p] & 0xff;
+      while (!(SPSR & (1<<SPIF))) {};
     }
-    // when we're done we hold the clock pin low for a millisecond to latch it
-    //digitalWrite(clockPin, LOW);
-    PORTD = PORTD & cpLOW;
-    delay(1);
-}
 
+    // for my protocol analyzer - see above
+    digitalWrite(SLAVESELECT,HIGH);
+}
 
 void WS2801::setPixelColor(uint16_t n, uint8_t r, uint8_t g, uint8_t b)
 {
@@ -135,6 +159,7 @@ void WS2801::setPixelColor(uint16_t n, uint32_t c)
 {
     if (n > numLEDs) return;
 
+    // mask off lower 24 bits
     pixels[n] = c & 0xFFFFFF;
 }
 
