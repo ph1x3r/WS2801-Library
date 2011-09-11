@@ -6,17 +6,7 @@
  * modified by ph1x3r for testing pixels in a matrix     *
  *********************************************************/
 
-// Choose which 2 pins you will use for output.
-// Can be any valid output pins.
-//
-// This is now defined in the header file because of speed improvement in
-// the output function.
-//
-// The colors of the wires may be totally different so
-// BE SURE TO CHECK YOUR PIXELS TO SEE WHICH WIRES TO USE!
-int clockPin = cPIN;      // 'blue' wire
-int dataPin = dPIN;       // 'green' wire
-// Don't forget to connect 'yellow' to ground and 'red' to +5V
+// Library uses the hardware SPI on the Arduino for enhanced speed
 
 // Set the first variable to the NUMBER of pixels. 25 = 25 pixels in a row
 // int pixLength=87;
@@ -26,11 +16,11 @@ int boxWidth=11;
 int boxHeight=15;
 
 // If you only want to use the string as a string, then use this function
-// WS2801 strip = WS2801(25, dataPin, clockPin);
+// WS2801 strip = WS2801(25);
 
 // or set the number of LEDs as a matrix of x and y size and the library
 // figures the rest out for you
-WS2801 strip = WS2801(boxWidth, boxHeight, dataPin, clockPin);
+WS2801 strip = WS2801(boxWidth, boxHeight);
 
 void setup() {
 
@@ -51,6 +41,7 @@ void loop() {
 
   // original adafruit function. 
   // run the length of the strand and set the color as defined
+  //
   // Usage:  colorWipe(color, wait)
   // color is the 24bit value and wait is the time between pixels
   colorWipe(strip.Color(255, 0, 0), 10);
@@ -59,31 +50,25 @@ void loop() {
   strip.clear();
   colorWipe(strip.Color(0, 0, 255), 10);
   strip.clear();
-  // colorWipe(strip.Color(255, 255, 255), 10);
-  // delay( 50);
-
-  strip.clear();
 
   // demonstrate new function for drawing horizontal and vertical lines
   strip.HVLine(6, 6, 4, 0, strip.Color(0, 255, 0));
   strip.show();
-  delay(100);
+  delay(500);
   strip.HVLine(6, 6, 4, 1, strip.Color(255, 255, 0));
   strip.show();
-  delay(100);
+  delay(500);
   strip.HVLine(6, 6, 4, 2, strip.Color(0, 255, 255));
   strip.show();
-  delay(100);
+  delay(500);
   strip.HVLine(6, 6, 4, 3, strip.Color(0, 0, 255));
   strip.show();
-  delay(100);
-
   delay(500);
+  strip.clear();
 
   // display a shrinking box
   int steps = abs((boxWidth+boxHeight)/4);
-  int xx; 
-  for(xx=0; xx<steps; xx++)
+  for(int xx=0; xx<steps; xx++)
   {
     int x1=0;
     int y1=0;
@@ -96,7 +81,7 @@ void loop() {
   }
 
   // different color
-  for(xx=0; xx<steps; xx++)
+  for(int xx=0; xx<steps; xx++)
   {
     int x1=0;
     int y1=0;
@@ -108,7 +93,7 @@ void loop() {
     strip.box(x1+xx, y1+xx, x2-xx, y2-xx, strip.Color(0, 0, 0));
   }
   // different color
-  for(xx=0; xx<steps; xx++)
+  for(int xx=0; xx<steps; xx++)
   {
     int x1=0;
     int y1=0;
@@ -119,41 +104,49 @@ void loop() {
     delay(500);
     strip.box(x1+xx, y1+xx, x2-xx, y2-xx, strip.Color(0, 0, 0));
   }
+  
+  strip.clear();
 
   // blink all the lights in random colors
   strip.Twinkle(30, 50);
 
+  for(int xx=0; xx<255; xx+=5)
+  {
+    strip.SpinLine(1, strip.Color(128, xx, 32));
+  }
+
+  strip.clear();
 
   //Do some wipes of color on the grid.
-  strip.MoveLinesV(5, strip.Color(128,0,0));
-  strip.MoveLinesRV(5, strip.Color(128,0,0));
-  strip.MoveLinesH(5, strip.Color(128,0,0));
-  strip.MoveLinesRH(5, strip.Color(128,0,0));
+  strip.MoveLinesV(50, strip.Color(128,0,0));
+  strip.MoveLinesRV(50, strip.Color(128,0,0));
+  strip.MoveLinesH(50, strip.Color(128,0,0));
+  strip.MoveLinesRH(50, strip.Color(128,0,0));
 
-  strip.MoveLinesV(5, strip.Color(64,64,0));
-  strip.MoveLinesRV(5, strip.Color(64,64,0));
-  strip.MoveLinesH(5, strip.Color(64,64,0));
-  strip.MoveLinesRH(5, strip.Color(64,64,0));
+  strip.MoveLinesV(50, strip.Color(64,64,0));
+  strip.MoveLinesRV(50, strip.Color(64,64,0));
+  strip.MoveLinesH(50, strip.Color(64,64,0));
+  strip.MoveLinesRH(50, strip.Color(64,64,0));
 
-  strip.MoveLinesV(5, strip.Color(0,254,0));
-  strip.MoveLinesRV(5, strip.Color(0,254,0));
-  strip.MoveLinesH(5, strip.Color(0,254,0));
-  strip.MoveLinesRH(5, strip.Color(0,254,0));
+  strip.MoveLinesV(50, strip.Color(0,254,0));
+  strip.MoveLinesRV(50, strip.Color(0,254,0));
+  strip.MoveLinesH(50, strip.Color(0,254,0));
+  strip.MoveLinesRH(50, strip.Color(0,254,0));
 
-  strip.MoveLinesV(5, strip.Color(0,254,254));
-  strip.MoveLinesRV(5, strip.Color(0,254,254));
-  strip.MoveLinesH(5, strip.Color(0,254,254));      
-  strip.MoveLinesRH(5, strip.Color(0,254,254));
+  strip.MoveLinesV(50, strip.Color(0,254,254));
+  strip.MoveLinesRV(50, strip.Color(0,254,254));
+  strip.MoveLinesH(50, strip.Color(0,254,254));      
+  strip.MoveLinesRH(50, strip.Color(0,254,254));
 
-  strip.MoveLinesV(5, strip.Color(0,0,254));
-  strip.MoveLinesRV(5, strip.Color(0,0,254));
-  strip.MoveLinesH(5, strip.Color(0,0,254));
-  strip.MoveLinesRH(5, strip.Color(0,0,254));
+  strip.MoveLinesV(50, strip.Color(0,0,254));
+  strip.MoveLinesRV(50, strip.Color(0,0,254));
+  strip.MoveLinesH(50, strip.Color(0,0,254));
+  strip.MoveLinesRH(50, strip.Color(0,0,254));
 
-  strip.MoveLinesV(5, strip.Color(254,0,254));
-  strip.MoveLinesRV(5, strip.Color(254,0,254));
-  strip.MoveLinesH(5, strip.Color(254,0,254));
-  strip.MoveLinesRH(5, strip.Color(254,0,254));  
+  strip.MoveLinesV(50, strip.Color(254,0,254));
+  strip.MoveLinesRV(50, strip.Color(254,0,254));
+  strip.MoveLinesH(50, strip.Color(254,0,254));
+  strip.MoveLinesRH(50, strip.Color(254,0,254));  
 
   strip.clear();
 
@@ -163,16 +156,13 @@ void loop() {
   strip.comet(50, 254, 254, 254, 20);
 
   strip.clear();
-  for(xx=0; xx<255; xx+=5)
-  {
-    strip.SpinLine(5, strip.Color(128, xx, 32));
-  }
-
+    
   // original adafruit calls for rainbow display on the strand
-  rainbow(5);
+  rainbow(10);
+  
   strip.clear();
 
-  rainbowCycle(5);
+  rainbowCycle(10);
 }
 
 // original adafruit code for 'rainbow' effect on the strand
