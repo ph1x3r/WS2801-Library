@@ -1,0 +1,37 @@
+#######################################
+# Syntax Coloring Map For LiquidTWI
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+WS2801	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin	KEYWORD2
+show	KEYWORD2
+setPixelColor	KEYWORD2
+numPixels	KEYWORD2
+Translate	KEYWORD2
+Color	KEYWORD2
+line	KEYWORD2
+HVLine	KEYWORD2
+box	KEYWORD2
+comet	KEYWORD2
+AllRandom	KEYWORD2
+All	KEYWORD2
+Twinkle	KEYWORD2
+SpinLine	KEYWORD2
+clear	KEYWORD2
+MoveLinesH	KEYWORD2
+MoveLinesRH	KEYWORD2
+MoveLinesV	KEYWORD2
+MoveLinesRV	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
